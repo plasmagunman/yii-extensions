@@ -54,13 +54,13 @@ class HttpAuthFilter extends CFilter
 			$username=$_SERVER['PHP_AUTH_USER'];
 			$password=$_SERVER['PHP_AUTH_PW'];
 
-			if($this->users[$username]==$password)
+			if(isset($this->users[$username]) && $this->users[$username]===$password)
 			{
 				return true;
 			}
-
 		}
 		header("WWW-Authenticate: Basic realm=\"".$this->realm."\"");
 		throw new CHttpException(401,Yii::t('yii','You are not authorized to perform this action.'));
 	}
 }
+
