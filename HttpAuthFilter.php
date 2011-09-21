@@ -63,4 +63,3 @@ class HttpAuthFilter extends CFilter
 		throw new CHttpException(401,Yii::t('yii','You are not authorized to perform this action.'));
 	}
 }
-
