@@ -15,19 +15,18 @@
  * To specify the authorized users specify the 'users' property of the filter
  * Example:
  * <pre>
- *
  * public function filters()
  * {
  *     return array(
  *         array(
  *             'HttpAuthFilter',
  *             'users'=>array('admin'=>'admin'),
- *             'realm'=>'Admin section'
- *         )
+ *             'realm'=>'Admin section',
+ *         ),
  *     );
  * }
+ * </pre>
  * The default section for the users property is 'admin'=>'admin'. Change it!
- *
  */
 class HttpAuthFilter extends CFilter
 {
