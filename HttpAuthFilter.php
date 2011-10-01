@@ -27,18 +27,35 @@
  * }
  * </pre>
  * The default section for the users property is 'admin'=>'admin'. Change it!
+ *
+ * in php/cgi context $_SERVER['PHP_AUTH_USER'] and $_SERVER['PHP_AUTH_PW'] are not set.
+ * the following rule uses the apache module mod_rewrite to store the http authorization data in the
+ * environment variable 'HTTP_AUTHORIZATION', depending on your server it will be accessible as
+ * $_SERVER['HTTP_AUTHORIZATION'] or $_SERVER['REDIRECT_HTTP_AUTHORIZATION']:
+ * <pre>
+ * <IfModule mod_rewrite.c>
+ *     RewriteEngine on
+ *     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+ * </IfModule>
+ * </pre>
+ * set cgiWorkaroundEnvironmentVar to 'HTTP_AUTHORIZATION' or 'REDIRECT_HTTP_AUTHORIZATION'.
  */
 class HttpAuthFilter extends CFilter
 {
 	/**
-	 * @return array list of authorized users/passwords
+	 * @var array list of authorized users/passwords
 	 */
 	public $users=array('admin'=>'admin',);
 
 	/**
-	 * @return string authentication realm
+	 * @var string authentication realm
 	 */
 	public $realm='Authentication needed';
+
+	/**
+	 * @var mixed false or string, name of environment variable where http authorization header is stored in php/cgi context.
+	 */
+	public $cgiWorkaroundEnvironmentVar=false;
 
 	/**
 	 * Performs the pre-action filtering.
@@ -48,6 +65,12 @@ class HttpAuthFilter extends CFilter
 	 */
 	protected function preFilter($filterChain)
 	{
+		// get auth data if cgiWorkaroundEnvironmentVar ist set
+		if ( $this->cgiWorkaroundEnvironmentVar && isset($_SERVER[ $this->cgiWorkaroundEnvironmentVar ]) )
+		{
+			list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':' , base64_decode(substr($_SERVER[ $this->cgiWorkaroundEnvironmentVar ], 6)));
+		}
+
 		if (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW']))
 		{
 			$username=$_SERVER['PHP_AUTH_USER'];
